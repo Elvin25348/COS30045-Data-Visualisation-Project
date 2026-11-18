@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Road Injury Stories | Australia 2011–2021</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script defer src="./js/main.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="wrap navigation" aria-label="Chart navigation">
+      <a class="brand" href="#main">Road Injury Stories</a>
+      <div class="nav-links">
+        <a href="#annual">Annual trend</a>
+        <a href="#remoteness">Remoteness</a>
+        <a href="#road-users">Road users</a>
+        <a href="#age">Age groups</a>
+        <a href="#bed-days">Bed days</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="wrap">
+    <div class="hero">
+      <p class="eyebrow">Australia · BITRE data · 2011–2021</p>
+      <h1>Hospitalised injuries<br>from road crashes</h1>
+      <p>Explore how road crash injury hospitalisations changed over time, who was hospitalised, and how bed days per hospitalisation varied across Australia.</p>
+    </div>
+
+    <noscript><p>Enable JavaScript to view the charts.</p></noscript>
+    <p id="load-status" role="status" hidden></p>
+
+    <section id="annual" aria-labelledby="annual-title">
+      <p class="eyebrow">National trend · 2011–2021</p>
+      <h2 id="annual-title">How did annual hospitalisations change?</h2>
+      <p class="finding">Hospitalisations rose from 34,033 in 2011 to 39,505 in 2021, with a dip in 2020.</p>
+      <div class="chart" aria-label="Annual hospitalisations line chart"></div>
+      <p class="note">BITRE national workbook, T1. Victoria and NSW have breaks in their state series from 2012 and June 2017, respectively.</p>
+    </section>
+
+    <section id="remoteness" aria-labelledby="remoteness-title">
+      <p class="eyebrow">Residential remoteness · 2011 to 2021</p>
+      <h2 id="remoteness-title">Where did hospitalisations change most?</h2>
+      <p class="finding">Major Cities recorded the largest percentage increase. Remote areas recorded a decrease.</p>
+      <div class="toggle" role="group" aria-label="Change measure">
+        <button type="button" data-measure="percent" aria-pressed="true">Percentage change</button>
+        <button type="button" data-measure="count" aria-pressed="false">Count change</button>
+      </div>
+      <div class="chart" aria-label="Change by residential remoteness bar chart"></div>
+      <p class="note">BITRE national workbook, T4. Remoteness refers to patients’ residence. Other or unknown residence is excluded from this comparison.</p>
+    </section>
+
+    <section id="road-users" aria-labelledby="road-title">
+      <p class="eyebrow">Road user groups · 2021</p>
+      <h2 id="road-title">How did road user shares vary by state or territory?</h2>
+      <p class="finding">Car occupants had the largest published share in seven jurisdictions. In the ACT, pedal cyclists accounted for 45%.</p>
+      <div class="chart matrix" tabindex="0" role="region" aria-label="Road user shares heatmap"></div>
+      <p class="note">BITRE state and territory workbook, T2. Shares use the jurisdiction total, which includes other or unknown road users and unpublished counts.</p>
+    </section>
+
+    <section id="age" aria-labelledby="age-title">
+      <p class="eyebrow">Age groups · 2021</p>
+      <h2 id="age-title">How did the age distribution differ by state or territory?</h2>
+      <p class="finding">People aged 40–64 had the largest published share in all eight jurisdictions.</p>
+      <div class="chart matrix" tabindex="0" role="region" aria-label="Age group shares heatmap"></div>
+      <p class="note">BITRE state and territory workbook, T4. Age bands span different numbers of years.</p>
+    </section>
+
+    <section id="bed-days" aria-labelledby="bed-title">
+      <p class="eyebrow">Hospital bed days · 2021</p>
+      <h2 id="bed-title">Which jurisdictions recorded the most bed days per hospitalisation?</h2>
+      <p class="finding">Western Australia ranked highest at 6.25 days per hospitalisation, followed by NSW at 6.12.</p>
+      <div class="chart" aria-label="Average bed days per hospitalisation bar chart"></div>
+      <p class="note">BITRE state and territory workbook, raw A–F. Average = total bed days ÷ total hospitalisations. Both totals exclude cases involving death in hospital within 30 days.</p>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p>Data from the <a href="https://www.bitre.gov.au/publications/ongoing/hospitalised-injury">Bureau of Infrastructure and Transport Research Economics (BITRE)</a>, 2023 release.</p>
+    <p>Counts and shares describe recorded hospitalisations. Comparing injury risk requires suitable population or exposure data.</p>
+    <p>COS30045 Data Visualisation · Elvin, Bryan and Narzin</p>
+  </footer>
+
+  <div id="tooltip" role="tooltip" hidden></div>
+</body>
+</html>
