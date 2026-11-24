@@ -52,19 +52,43 @@
       <p class="note">BITRE national workbook, T4. Remoteness refers to patients’ residence. Other or unknown residence is excluded from this comparison.</p>
     </section>
 
+
     <section id="road-users" aria-labelledby="road-title">
       <p class="eyebrow">Road user groups · 2021</p>
-      <h2 id="road-title">How did road user shares vary by state or territory?</h2>
-      <p class="finding">Car occupants had the largest published share in seven jurisdictions. In the ACT, pedal cyclists accounted for 45%.</p>
-      <div class="chart matrix" tabindex="0" role="region" aria-label="Road user shares heatmap"></div>
-      <p class="note">BITRE state and territory workbook, T2. Shares use the jurisdiction total, which includes other or unknown road users and unpublished counts.</p>
+      <h2 id="road-title">Which road-user groups recorded the highest hospitalisation counts?</h2>
+      <p class="finding">Car occupants recorded the highest published hospitalisation count, followed by motorcyclists and pedal cyclists.</p>
+      <div class="filters" role="group" aria-label="Road user filters">
+        <label for="q3-limit">Display:</label>
+        <select id="q3-limit">
+          <option value="all">All road-user groups</option>
+          <option value="3">Top 3 groups</option>
+          <option value="5">Top 5 groups</option>
+        </select>
+        <button type="button" id="q3-apply">Apply Filter</button>
+        <button type="button" id="q3-reset">Reset</button>
+      </div>
+      <div class="chart" aria-label="Road-user Pareto chart"></div>
+      <p class="note">BITRE state and territory workbook, T2. Some categories contain unpublished values (n.p.). Their totals represent published values only.</p>
     </section>
+
 
     <section id="age" aria-labelledby="age-title">
       <p class="eyebrow">Age groups · 2021</p>
       <h2 id="age-title">How did the age distribution differ by state or territory?</h2>
       <p class="finding">People aged 40–64 had the largest published share in all eight jurisdictions.</p>
-      <div class="chart matrix" tabindex="0" role="region" aria-label="Age group shares heatmap"></div>
+      <div class="filters" role="group" aria-label="Age group filters">
+      <div class="filter-field">
+        <label for="q4-state-filter">State or territory:</label>
+        <select id="q4-state-filter"><option value="all">All states and territories</option></select>
+      </div>
+      <div class="filter-field">
+        <label for="q4-age-filter">Age group:</label>
+        <select id="q4-age-filter"><option value="all">All age groups</option></select>
+          </div>
+            <button type="button" id="q4-apply">Apply Filter</button>
+            <button type="button" id="q4-reset">Reset</button>
+          </div>
+          <div class="chart matrix" tabindex="0" role="region" aria-label="Age group shares heatmap"></div>
       <p class="note">BITRE state and territory workbook, T4. Age bands span different numbers of years.</p>
     </section>
 
