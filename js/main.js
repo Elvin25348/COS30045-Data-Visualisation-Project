@@ -161,6 +161,187 @@ function drawBars(container, rows, options) {
     .text(row => options.format(options.value(row)));
 }
 
+
+function drawParetoChart(container, rows, limit = "all") {
+  const sorted = rows
+    .filter(row => Number.isFinite(row.count) && row.count >= 0)
+    .sort((a, b) => b.count - a.count);
+
+  if (sorted.length === 0) {
+    container.textContent = "No road-user data available.";
+    return;
+  }
+
+  // Short labels for better chart readability
+  const getLabel = group => {
+    const value = group.toLowerCase();
+
+    if (value.includes("car")) return "Car occupants";
+    if (value.includes("motorcycl")) return "Motorcyclists";
+    if (value.includes("pedal")) return "Pedal cyclists";
+    if (value.includes("pedestrian")) return "Pedestrians";
+    if (value.includes("heavy")) return "Heavy transport";
+    if (value.includes("pick-up") || value.includes("van")) {
+      return "Pick-up / van";
+    }
+    if (value.includes("bus")) return "Bus occupants";
+
+    return group;
+  };
+
+  // Calculate cumulative percentage using all seven categories
+  const total = d3.sum(sorted, row => row.count);
+  let runningTotal = 0;
+
+  const ranked = sorted.map(row => {
+    runningTotal += row.count;
+
+    return {
+      ...row,
+      label: getLabel(row.group),
+      cumulative: total > 0
+        ? runningTotal / total * 100
+        : 0
+    };
+  });
+
+  const visible = limit === "all"
+    ? ranked
+    : ranked.slice(0, Number(limit));
+
+  const height = 470;
+  const { svg, width } = createPlot(container, height, 850);
+
+  const left = 75;
+  const right = width - 85;
+  const top = 50;
+  const bottom = 300;
+
+  const x = d3.scaleBand()
+    .domain(visible.map(row => row.label))
+    .range([left, right])
+    .padding(0.22);
+
+  const yCount = d3.scaleLinear()
+    .domain([0, d3.max(sorted, row => row.count) || 1])
+    .nice()
+    .range([bottom, top]);
+
+  const yPercent = d3.scaleLinear()
+    .domain([0, 100])
+    .range([bottom, top]);
+
+  // Horizontal gridlines
+  drawAxis(
+    svg,
+    d3.axisLeft(yCount).ticks(5).tickSize(left - right).tickFormat(""),
+    left,
+    0,
+    "grid"
+  );
+
+  // Left axis: hospitalisation counts
+  drawAxis(
+    svg,
+    d3.axisLeft(yCount).ticks(5).tickFormat(d3.format(",d")),
+    left,
+    0
+  );
+
+  // Right axis: cumulative percentage
+  drawAxis(
+    svg,
+    d3.axisRight(yPercent).ticks(5).tickFormat(value => `${value}%`),
+    right,
+    0
+  );
+
+  // Bottom axis: road-user categories
+  const xAxis = svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(0,${bottom})`)
+    .call(d3.axisBottom(x).tickSize(0));
+
+  xAxis.selectAll("text")
+    .attr("transform", "rotate(-25)")
+    .attr("text-anchor", "end")
+    .attr("dx", "-0.6em")
+    .attr("dy", "0.5em");
+
+  axisLabel(svg, 0, 22, "Hospitalisations");
+  axisLabel(svg, width, 22, "Cumulative percentage", "end");
+  axisLabel(svg, (left + right) / 2, 435, "Road-user group", "middle");
+
+  // Draw bars
+  const bars = svg.selectAll(".pareto-bar")
+    .data(visible)
+    .join("rect")
+    .attr("class", "pareto-bar")
+    .attr("x", row => x(row.label))
+    .attr("y", row => yCount(row.count))
+    .attr("width", x.bandwidth())
+    .attr("height", row => bottom - yCount(row.count))
+    .attr("rx", 3)
+    .attr("fill", "#247981");
+
+  addTooltips(bars, row =>
+    `${row.group}: ${count(row.count)} hospitalisations`
+  );
+
+  // Cumulative percentage line
+  const line = d3.line()
+    .x(row => x(row.label) + x.bandwidth() / 2)
+    .y(row => yPercent(row.cumulative));
+
+  svg.append("path")
+    .datum(visible)
+    .attr("d", line)
+    .attr("fill", "none")
+    .attr("stroke", "#a45231")
+    .attr("stroke-width", 3);
+
+  // Line points
+  const points = svg.selectAll(".pareto-point")
+    .data(visible)
+    .join("circle")
+    .attr("class", "pareto-point")
+    .attr("cx", row => x(row.label) + x.bandwidth() / 2)
+    .attr("cy", row => yPercent(row.cumulative))
+    .attr("r", 5)
+    .attr("fill", "#a45231");
+
+  addTooltips(points, row =>
+    `${row.group}: ${row.cumulative.toFixed(2)}% cumulative`
+  );
+
+  // Chart legend
+  const legend = svg.append("g")
+    .attr("transform", `translate(${left + 30},455)`);
+
+  legend.append("rect")
+    .attr("width", 13)
+    .attr("height", 13)
+    .attr("fill", "#247981");
+
+  legend.append("text")
+    .attr("x", 20)
+    .attr("y", 11)
+    .text("Hospitalisations");
+
+  legend.append("line")
+    .attr("x1", 165)
+    .attr("x2", 185)
+    .attr("y1", 6)
+    .attr("y2", 6)
+    .attr("stroke", "#a45231")
+    .attr("stroke-width", 3);
+
+  legend.append("text")
+    .attr("x", 192)
+    .attr("y", 11)
+    .text("Cumulative percentage");
+}
+
 const stateAbbreviations = {
   "New South Wales": "NSW",
   "Victoria": "VIC",
@@ -296,7 +477,7 @@ async function start() {
   const ageGroups = document.querySelector("#age");
   const bedDays = document.querySelector("#bed-days");
 
-  const [years, places, roads, ages, beds] = await Promise.all([
+  const [years, places, roads, ages, beds, paretoRows] = await Promise.all([
     d3.csv("./data/q1_annual_trend.csv", row => ({
       year: Number(row["Calendar year"]),
       total: Number(row.Total)
@@ -314,11 +495,16 @@ async function start() {
       cases: Number(row.cases),
       days: Number(row.bed_days),
       average: Number(row["Bed days per hospitalisation"])
+    })),
+    d3.csv("./data/q3_pareto_counts.csv", 
+      row => ({group: row["Road-user group"],
+      count: Number(row.Hospitalisations)
     }))
   ]);
 
   years.sort((a, b) => a.year - b.year);
   beds.sort((a, b) => b.average - a.average);
+  paretoRows.sort((a, b) => b.count - a.count);
 
   // Q1: annual line chart
   mountChart(annual, container => drawLine(container, years));
@@ -357,15 +543,106 @@ async function start() {
       signed(row.percent, decimal), signed(row.end - row.start, count)
     ]));
 
-  // Q3 and Q4: within-jurisdiction shares
-  for (const [section, rows, category] of [
-    [roadUsers, roads, "Road user group"],
-    [ageGroups, ages, "Age group (years)"]
-  ]) {
-    mountChart(section, container => drawHeatmap(container, rows, category));
-    addDataTable(section, ["State or territory", category, "Share (%)"],
-      rows.map(row => [row.state, row.group, displayShare(row.share)]));
-  }
+  
+  // Q3: Road-user Pareto chart
+
+  paretoRows.sort((a, b) => b.count - a.count);
+
+  let q3Limit = "all";
+  const q3LimitSelect = roadUsers.querySelector("#q3-limit");
+
+  const renderQ3 = mountChart(roadUsers, container => {
+    drawParetoChart(container, paretoRows, q3Limit);
+  });
+
+  roadUsers.querySelector("#q3-apply").addEventListener("click", () => {
+    q3Limit = q3LimitSelect.value;
+    renderQ3();
+  });
+
+  roadUsers.querySelector("#q3-reset").addEventListener("click", () => {
+    q3LimitSelect.value = "all";
+    q3Limit = "all";
+    renderQ3();
+  });
+
+  addDataTable(
+    roadUsers,
+    ["Road-user group", "Hospitalisations"],
+    paretoRows.map(row => [row.group, count(row.count)])
+  );
+
+  // Q4: Age-group heatmap with interactive filters
+
+  const q4StateFilter = ageGroups.querySelector("#q4-state-filter");
+  const q4AgeFilter = ageGroups.querySelector("#q4-age-filter");
+
+  // Populate state dropdown
+  const states = [...new Set(ages.map(row => row.state))];
+
+  states.forEach(state => {
+    q4StateFilter.add(new Option(state, state));
+  });
+
+  // Populate age-group dropdown
+  const ageList = [...new Set(ages.map(row => row.group))];
+
+  ageList.forEach(group => {
+    q4AgeFilter.add(new Option(group, group));
+  });
+
+  // Default filters
+  let selectedState = "all";
+  let selectedAge = "all";
+
+  // Render filtered heatmap
+  const renderQ4 = mountChart(ageGroups, container => {
+
+    const filteredRows = ages.filter(row =>
+      (selectedState === "all" || row.state === selectedState) &&
+      (selectedAge === "all" || row.group === selectedAge)
+    );
+
+    if (filteredRows.length === 0) {
+      container.textContent = "No data available for this selection.";
+      return;
+    }
+
+    drawHeatmap(container, filteredRows, "Age group (years)");
+  });
+
+  // Apply Filter button
+  ageGroups.querySelector("#q4-apply").addEventListener("click", () => {
+
+    selectedState = q4StateFilter.value;
+    selectedAge = q4AgeFilter.value;
+
+    renderQ4();
+  });
+
+  // Reset button
+  ageGroups.querySelector("#q4-reset").addEventListener("click", () => {
+
+    q4StateFilter.value = "all";
+    q4AgeFilter.value = "all";
+
+    selectedState = "all";
+    selectedAge = "all";
+
+    renderQ4();
+  });
+
+  // Display original complete data table
+  addDataTable(
+    ageGroups,
+    ["State or territory", "Age group (years)", "Share (%)"],
+    ages.map(row => [
+      row.state,
+      row.group,
+      displayShare(row.share)
+    ])
+  );
+
 
   // Q5: bed days per hospitalisation, ranked highest first
   mountChart(bedDays, container => drawBars(container, beds, {

@@ -118,3 +118,132 @@ th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--lin
 }
 
 #load-status { padding: 12px; background: #fff1e8; border-radius: 8px; }
+
+
+/* =====================================
+   Q3 and Q4 FILTER CONTROLS
+===================================== */
+
+#road-users .filters,
+#age .filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 16px;
+  background: #f2f6f5;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+/* Filter labels */
+
+#road-users .filters label,
+#age .filters label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+/* Q4 dropdown containers */
+
+#age .filter-field {
+  display: grid;
+  flex: 1 1 190px;
+  gap: 5px;
+}
+
+/* Dropdown menus */
+
+#road-users .filters select,
+#age .filters select {
+  min-height: 40px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+/* Filter buttons */
+
+#road-users .filters button,
+#age .filters button {
+  min-height: 40px;
+  padding: 9px 17px;
+  border-radius: 8px;
+  font-weight: 650;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* Apply Filter button */
+
+#road-users #q3-apply,
+#age #q4-apply {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+#road-users #q3-apply:hover,
+#age #q4-apply:hover {
+  background: #0c4e52;
+  color: white;
+}
+
+/* Reset button */
+
+#road-users #q3-reset,
+#age #q4-reset {
+  background: white;
+  color: var(--accent);
+}
+
+#road-users #q3-reset:hover,
+#age #q4-reset:hover {
+  background: #e4eeee;
+}
+
+/* Keyboard accessibility */
+
+#road-users .filters select:focus-visible,
+#age .filters select:focus-visible,
+#road-users .filters button:focus-visible,
+#age .filters button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Chart spacing */
+
+#road-users .chart,
+#age .chart {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Mobile responsive layout */
+
+@media (max-width: 600px) {
+  #road-users .filters,
+  #age .filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #road-users .filters button,
+  #age .filters button {
+    width: 100%;
+  }
+
+  #age .filter-field {
+    width: 100%;
+  }
+}
